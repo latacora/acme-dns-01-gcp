@@ -61,14 +61,14 @@ tester.test('http-01', 'example.com', {
     //   // dns-01 only, for testing / dubgging
     // , altname: '...'
     // , dnsHost: '...'
-    // , dnsAuthorization: '...' }
+    // , wildcard: false }
     // Note: query.identifier.value is different for http-01 than for dns-01
 
-    return API.get(...).then(function () {
+    return API.get(...).then(function (secret) {
       // http-01
-      return { identifier: { type: 'dns', value: 'example.com' }, keyAuthorization: 'xxxx.yyyy' };
+      return { keyAuthorization: secret };
       // dns-01
-      //return { identifier: { type: 'dns', value: 'example.com' }, dnsAuthorization: 'zzzz' };
+      //return { dnsAuthorization: secret };
     });
   }
 , remove: function (opts) {

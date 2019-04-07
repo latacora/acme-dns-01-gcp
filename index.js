@@ -34,6 +34,7 @@ function promiseCheckAndCatch(obj, name) {
       throw new Error("'challenge.'" + name + "' should never return `undefined`. Please explicitly return null"
         + " (or fix the place where a value should have been returned but wasn't).");
     }
+    return result;
   }
 
   return function (opts) {
@@ -62,7 +63,8 @@ function run(challenger, opts) {
   // this will cause the prompt to appear
   return set(opts).then(function () {
     // this will cause the final completion message to appear
-    var query = { type: ch.type };
+    // _test is used by the manual cli reference implementations
+    var query = { type: ch.type, /*debug*/ status: ch.status, _test: true };
     if ('http-01' === ch.type) {
       query.identifier = ch.identifier;
       query.token = ch.token;
@@ -72,37 +74,47 @@ function run(challenger, opts) {
       query.identifier = { type: 'dns', value: ch.dnsHost };
       // For testing only
       query.altname = ch.altname;
-      query.dnsAuthorization = ch.dnsAuthorization;
+      // there should only be two possible TXT records per challenge domain:
+      // one for the bare domain, and the other if and only if there's a wildcard
+      query.wildcard = ch.wildcard;
     } else {
       query = JSON.parse(JSON.stringify(ch));
       query.comment = "unknown challenge type, supplying everything";
     }
-    return get({ challenge: query }).then(function (result) {
+    return get({ challenge: query }).then(function (secret) {
+      if ('string' === typeof secret) {
+        console.info("secret was passed as a string, which works historically, but should be an object instead:");
+        console.info('{ "keyAuthorization": "' + secret + '" }');
+        console.info("or");
+        // TODO this should be "keyAuthorizationDigest"
+        console.info('{ "dnsAuthorization": "' + secret + '" }');
+        console.info("This is to help keep greenlock (and associated plugins) future-proof for new challenge types");
+      }
+      // historically 'secret' has been a string, but I'd like it to transition to be an object.
+      // to make it backwards compatible in v2.7 to change it,
+      // so I'm not sure that we really need to.
       if ('http-01' === ch.type) {
-        if (ch.keyAuthorization !== result.keyAuthorization
-          // cross-checking on purpose
-          || (ch.altname !== result.identifier.value || ch.identifier.value !== result.altname)
-        ) {
-          throw new Error("challenge.get() for http-01 should return the same altname, identifier.value,"
-            + " and keyAuthorization as were saved with challenge.set()");
+        secret = secret.keyAuthorization || secret;
+        if (ch.keyAuthorization !== secret) {
+          throw new Error("http-01 challenge.get() returned '" + secret + "', which does not match the keyAuthorization"
+            + " saved with challenge.set(), which was '" + ch.keyAuthorization + "'");
         }
       } else if ('dns-01' === ch.type) {
-        if (ch.dnsAuthorization !== result.dnsAuthorization
-          || ch.identifier.value !== result.identifier.value
-        ) {
-          throw new Error("challenge.get() for dns-01 should return the same identifier.value,"
-            + " and dnsAuthorization as were saved with challenge.set()");
+        secret = secret.dnsAuthorization || secret;
+        if (ch.dnsAuthorization !== secret) {
+          throw new Error("dns-01 challenge.get() returned '" + secret + "', which does not match the dnsAuthorization"
+            + " (keyAuthDigest) saved with challenge.set(), which was '" + ch.dnsAuthorization + "'");
         }
       } else {
-        if (ch.identifier.value !== result.identifier.value) {
-          throw new Error("challenge.get() should always return the same identifier.value,"
-            + " and dnsAuthorization as were saved with challenge.set()");
-        }
         if ('tls-alpn-01' === ch.type) {
           console.warn("'tls-alpn-01' support is in development"
             + " (or developed and we haven't update this yet). Please contact us.");
         } else {
           console.warn("We don't know how to test '" + ch.type + "'... are you sure that's a thing?");
+        }
+        secret = secret.keyAuthorization || secret;
+        if (ch.keyAuthorization !== secret) {
+          console.warn("The returned value doesn't match keyAuthorization", ch.keyAuthorization, secret);
         }
       }
     }).then(function () {
@@ -126,16 +138,17 @@ function run(challenger, opts) {
 
 module.exports.test = function (type, altname, challenger) {
   var expires = new Date(Date.now() + (10*60*1000)).toISOString();
-  var token = crypto.randomBytes('8').toString('hex');
-  var thumb = crypto.randomBytes('16').toString('hex');
-  var keyAuth = token + '.' + crypto.randomBytes('16').toString('hex');
+  var token = crypto.randomBytes(8).toString('hex');
+  var thumb = crypto.randomBytes(16).toString('hex');
+  var keyAuth = token + '.' + crypto.randomBytes(16).toString('hex');
   var dnsAuth = crypto.createHash('sha256').update(keyAuth).digest('base64')
-    .replace(/\+/, '-').replace(/\//, '_').replace(/=/, '');
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 
   var challenge = {
     type: type
   , identifier: { type: 'dns', value: null }  // completed below
   , wildcard: false                           // completed below
+  , status: 'pending'
   , expires: expires
   , token: token
   , thumbprint: thumb
@@ -144,6 +157,7 @@ module.exports.test = function (type, altname, challenger) {
   , dnsHost: '_acme-challenge.'               // completed below
   , dnsAuthorization: dnsAuth
   , altname: altname
+  , _test: true                               // used by CLI referenced implementations
   };
   if ('*.' === altname.slice(0, 2)) {
     challenge.wildcard = true;
@@ -153,11 +167,5 @@ module.exports.test = function (type, altname, challenger) {
   challenge.url = 'http://' + altname + '/.well-known/acme-challenge/' + challenge.token;
   challenge.dnsHost += altname;
 
-  run(challenger, { challenge: challenge }).then(function () {
-    console.info("PASS");
-  }).catch(function (err) {
-    console.error("FAIL");
-    console.error(err);
-    process.exit(20);
-  });
+  return run(challenger, { challenge: challenge });
 };

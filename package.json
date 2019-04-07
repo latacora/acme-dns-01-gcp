@@ -1,0 +1,27 @@
+{
+  "name": "greenlock-challenge-test",
+  "version": "3.0.0",
+  "description": "The base set of tests for all ACME challenge strategies. Any `greenlock-challenge-` plugin should be able to pass these tests.",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "node example.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.coolaj86.com/coolaj86/greenlock-challenge-test.js.git"
+  },
+  "keywords": [
+    "Let's Encrypt",
+    "ACME",
+    "http-01",
+    "dns-01",
+    "challenge",
+    "plugin",
+    "module",
+    "strategy"
+  ],
+  "author": "AJ ONeal <coolaj86@gmail.com> (https://coolaj86.com/)",
+  "license": "MPL-2.0"
+}
