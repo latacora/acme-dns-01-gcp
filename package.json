@@ -1,6 +1,6 @@
 {
   "name": "greenlock-challenge-test",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "The base set of tests for all ACME challenge strategies. Any `greenlock-challenge-` plugin should be able to pass these tests.",
   "main": "index.js",
   "dependencies": {},

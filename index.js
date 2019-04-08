@@ -69,7 +69,7 @@ function run(challenger, opts) {
       query.identifier = ch.identifier;
       query.token = ch.token;
       // For testing only
-      query.url = ch.token;
+      query.url = ch.challengeUrl;
     } else if ('dns-01' === ch.type) {
       query.identifier = { type: 'dns', value: ch.dnsHost };
       // For testing only
