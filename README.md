@@ -1,6 +1,4 @@
-# [greenlock-challenge-test](https://git.coolaj86.com/coolaj86/greenlock-challenge-test.js.git)
-
-| A [Root](https://rootprojects.org) Project |
+# [greenlock-challenge-test](https://git.rootprojects.org/root/greenlock-challenge-test.js.git) | A [Root](https://rootprojects.org) Project
 
 The test harness you should use when writing an ACME challenge strategy
 for [Greenlock](https://git.coolaj86.com/coolaj86/greenlock-express.js) v2.7+ (and v3).
@@ -35,7 +33,21 @@ tester.test('http-01', domain, challenger).then(function () {
 });
 ```
 
+## Reference Implementations
+
+These are plugins that use the v2.7+ (v3) API, and pass this test harness,
+which you should use as a model for any plugins that you create.
+
+* [greenlock-challenge-http](https://git.rootprojects.org/root/greenlock-challenge-http.js)
+* [greenlock-challenge-dns](https://git.rootprojects.org/root/greenlock-challenge-dns.js)
+
+## Example
+
+See `example.js` (it works).
+
 ## Overview
+
+Here's a quick pseudo stub-out of what a test-passing plugin object might look like:
 
 ```js
 tester.test('http-01', 'example.com', {
@@ -84,9 +96,3 @@ tester.test('http-01', 'example.com', {
 
 Note: The `API.get()`, `API.set()`, and `API.remove()` is where you do your magic up to upload a file to the correct
 location on an http serever, set DNS records, or add the appropriate data to the database that handles such things.
-
-## Example
-
-See `example.js` (it works).
-
-Will post reference implementations here later...

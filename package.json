@@ -1,8 +1,9 @@
 {
   "name": "greenlock-challenge-test",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "The base set of tests for all ACME challenge strategies. Any `greenlock-challenge-` plugin should be able to pass these tests.",
   "main": "index.js",
+  "homepage": "https://git.rootprojects.org/root/greenlock-challenge-test.js",
   "dependencies": {},
   "devDependencies": {},
   "scripts": {
@@ -10,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://git.coolaj86.com/coolaj86/greenlock-challenge-test.js.git"
+    "url": "https://git.rootprojects.org/root/greenlock-challenge-test.js.git"
   },
   "keywords": [
     "Let's Encrypt",
@@ -22,6 +23,6 @@
     "module",
     "strategy"
   ],
-  "author": "AJ ONeal <coolaj86@gmail.com> (https://coolaj86.com/)",
+  "author": "AJ ONeal <solderjs@gmail.com> (https://solderjs.com/)",
   "license": "MPL-2.0"
 }
