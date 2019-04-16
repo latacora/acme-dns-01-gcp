@@ -38,8 +38,8 @@ tester.test('http-01', domain, challenger).then(function () {
 These are plugins that use the v2.7+ (v3) API, and pass this test harness,
 which you should use as a model for any plugins that you create.
 
-* [greenlock-challenge-http](https://git.rootprojects.org/root/greenlock-challenge-http.js)
-* [greenlock-challenge-dns](https://git.rootprojects.org/root/greenlock-challenge-dns.js)
+* [`greenlock-challenge-http`](https://git.rootprojects.org/root/greenlock-challenge-http.js)
+* [`greenlock-challenge-dns`](https://git.rootprojects.org/root/greenlock-challenge-dns.js)
 
 ## Example
 
