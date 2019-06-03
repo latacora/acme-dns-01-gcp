@@ -1,4 +1,4 @@
-# [greenlock-challenge-test](https://git.rootprojects.org/root/greenlock-challenge-test.js.git) | A [Root](https://rootprojects.org) Project
+# [acme-challenge-test](https://git.rootprojects.org/root/acme-challenge-test.js.git) | A [Root](https://rootprojects.org) Project
 
 The test harness you should use when writing an ACME challenge strategy
 for [Greenlock](https://git.coolaj86.com/coolaj86/greenlock-express.js) v2.7+ (and v3).
@@ -12,24 +12,24 @@ that's not something you have to take special consideration for - just pass the 
 ## Install
 
 ```bash
-npm install --save-dev greenlock-challenge-test@3.x
+npm install --save-dev acme-challenge-test@3.x
 ```
 
 ## Usage
 
 ```js
-var tester = require('greenlock-challenge-test');
+var tester = require("acme-challenge-test");
 
-//var challenger = require('greenlock-challenge-http').create({});
-//var challenger = require('greenlock-challenge-dns').create({});
-var challenger = require('./YOUR-CHALLENGE-STRATEGY').create({});
+//var challenger = require('acme-http-01-cli').create({});
+//var challenger = require('acme-dns-01-cli').create({});
+var challenger = require("./YOUR-CHALLENGE-STRATEGY").create({});
 
 // The dry-run tests can pass on, literally, 'example.com'
 // but the integration tests require that you have control over the domain
-var domain = 'example.com';
+var domain = "example.com";
 
-tester.test('http-01', domain, challenger).then(function () {
-  console.info("PASS");
+tester.test("http-01", domain, challenger).then(function() {
+	console.info("PASS");
 });
 ```
 
@@ -38,8 +38,8 @@ tester.test('http-01', domain, challenger).then(function () {
 These are plugins that use the v2.7+ (v3) API, and pass this test harness,
 which you should use as a model for any plugins that you create.
 
-* [`greenlock-challenge-http`](https://git.rootprojects.org/root/greenlock-challenge-http.js)
-* [`greenlock-challenge-dns`](https://git.rootprojects.org/root/greenlock-challenge-dns.js)
+- [`acme-http-01-cli`](https://git.rootprojects.org/root/acme-http-01-cli.js)
+- [`acme-dns-01-cli`](https://git.rootprojects.org/root/acme-dns-01-cli.js)
 
 ## Example
 
