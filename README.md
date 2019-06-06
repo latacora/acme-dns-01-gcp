@@ -1,4 +1,4 @@
-# [acme-challenge-test](https://git.rootprojects.org/root/acme-challenge-test.js.git) | A [Root](https://rootprojects.org) Project
+# [acme-challenge-test](https://git.rootprojects.org/root/acme-challenge-test.js.git) | a [Root](https://rootprojects.org) project
 
 The test harness you should use when writing an ACME challenge strategy
 for [ACME.js](https://git.coolaj86.com/coolaj86/acme-v2.js) and also [Greenlock](https://git.coolaj86.com/coolaj86/greenlock-express.js) v2.7+ (and v3).
@@ -6,8 +6,7 @@ for [ACME.js](https://git.coolaj86.com/coolaj86/acme-v2.js) and also [Greenlock]
 All implementations MUST pass these tests, which is a very easy thing to do (just `set()`, `get()`, and `remove()`).
 
 The tests account for single-domain certificates (`example.com`) as well as multiple domain certs (SAN / AltName),
-wildcards (`*.example.com`), and valid private / localhost certificates. As someone creating a challenge strategy
-that's not something you have to take special consideration for - just pass the tests.
+wildcards (`*.example.com`), and valid private / localhost certificates. No worries on your end, just pass the tests. 👌
 
 **Node v6 Support**: Please build community plugins using node v6 / vanillajs to ensure that all acme.js and greenlock.js users are fully supported.
 
@@ -42,6 +41,8 @@ which you should use as a model for any plugins that you create.
 
 - [`acme-http-01-cli`](https://git.rootprojects.org/root/acme-http-01-cli.js)
 - [`acme-dns-01-cli`](https://git.rootprojects.org/root/acme-dns-01-cli.js)
+
+You can find other implementations by searching npm for [acme-http-01-](https://www.npmjs.com/search?q=acme-http-01-) and [acme-dns-01-](https://www.npmjs.com/search?q=acme-dns-01-).
 
 ## Example
 
@@ -155,8 +156,6 @@ location on an http serever, set DNS records, or add the appropriate data to the
 
 Note 2:
 
-When `altname` is `foo.example.com` the `dnsHost` will be `_acme-challenge.foo.example.com`
-
-When `altname` is `*.foo.example.com` the `dnsHost` will _still_ be `_acme-challenge.foo.example.com`
-
-When `altname` is `bar.foo.example.com` the `dnsHost` will be `_acme-challenge.bar.foo.example.com`
+* When `altname` is `foo.example.com` the `dnsHost` will be `_acme-challenge.foo.example.com`
+* When `altname` is `*.foo.example.com` the `dnsHost` will _still_ be `_acme-challenge.foo.example.com`!!
+* When `altname` is `bar.foo.example.com` the `dnsHost` will be `_acme-challenge.bar.foo.example.com`
