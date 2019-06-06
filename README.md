@@ -84,6 +84,19 @@ tester.test("http-01", domain, {
 });
 ```
 
+## dns-01 vs http-01
+
+For `type` http-01:
+
+    // `altname` is the name of the domain
+    // `token` is the name of the file ( .well-known/acme-challenge/`token` )
+    // `keyAuthorization` is the contents of the file
+
+For `type` dns-01:
+
+    // `dnsHost` is the domain/subdomain/host
+    // `dnsAuthorization` is the value of the TXT record
+
 ## Detailed Overview
 
 Here's a quick pseudo stub-out of what a test-passing plugin object might look like:
@@ -133,5 +146,17 @@ tester.test('http-01', 'example.com', {
 });
 ```
 
-Note: The `API.get()`, `API.set()`, and `API.remove()` is where you do your magic up to upload a file to the correct
+### Two notes:
+
+Note 1:
+
+The `API.get()`, `API.set()`, and `API.remove()` is where you do your magic up to upload a file to the correct
 location on an http serever, set DNS records, or add the appropriate data to the database that handles such things.
+
+Note 2:
+
+When `altname` is `foo.example.com` the `dnsHost` will be `_acme-challenge.foo.example.com`
+
+When `altname` is `*.foo.example.com` the `dnsHost` will _still_ be `_acme-challenge.foo.example.com`
+
+When `altname` is `bar.foo.example.com` the `dnsHost` will be `_acme-challenge.bar.foo.example.com`
