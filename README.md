@@ -1,7 +1,7 @@
 # [acme-challenge-test](https://git.rootprojects.org/root/acme-challenge-test.js.git) | A [Root](https://rootprojects.org) Project
 
 The test harness you should use when writing an ACME challenge strategy
-for [Greenlock](https://git.coolaj86.com/coolaj86/greenlock-express.js) v2.7+ (and v3).
+for [ACME.js](https://git.coolaj86.com/coolaj86/acme-v2.js) and also [Greenlock](https://git.coolaj86.com/coolaj86/greenlock-express.js) v2.7+ (and v3).
 
 All implementations MUST pass these tests, which is a very easy thing to do (just `set()`, `get()`, and `remove()`).
 
