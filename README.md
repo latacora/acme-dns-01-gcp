@@ -55,36 +55,37 @@ See `example.js` (it works).
 Here's what you could start with.
 
 ```js
-var tester = require("acme-challenge-test");
+var tester = require('acme-challenge-test');
 
 // The dry-run tests can pass on, literally, 'example.com'
 // but the integration tests require that you have control over the domain
-var domain = "example.com";
+var domain = 'example.com';
 
-tester.test("http-01", domain, {
+tester
+  .test('http-01', domain, {
+    // Should set a TXT record for dnsHost with dnsAuthorization and ttl || 300
+    set: function(opts) {
+      console.log('set opts:', opts);
+      throw new Error('set not implemented');
+    },
 
-  // Should set a TXT record for opts.dnsHost with opts.dnsAuthorization for opts.ttl || 300
-  set: function (opts) {
-    console.log("set opts:", opts);
-    throw new Error("set not implemented");
-  },
-  
-  // Should remove the *one* TXT record for opts.dnsHost with opts.dnsAuthorization
-  // Should NOT remove otherrecords for opts.dnsHost (wildcard shares dnsHost with non-wildcard)
-  remove: function (opts) {
-    console.log("remove opts:", opts);
-    throw new Error("remove not implemented");
-  },
-  
-  // Should get the record via the DNS server's API
-  get: function (opts) {
-    console.log("get opts:", opts);
-    throw new Error("get not implemented");
-  }
+    // Should remove the *one* TXT record for dnsHost with dnsAuthorization
+    // Should NOT remove otherrecords for dnsHost (wildcard shares dnsHost with
+    // non-wildcard)
+    remove: function(opts) {
+      console.log('remove opts:', opts);
+      throw new Error('remove not implemented');
+    },
 
-}).then(function() {
-	console.info("PASS");
-});
+    // Should get the record via the DNS server's API
+    get: function(opts) {
+      console.log('get opts:', opts);
+      throw new Error('get not implemented');
+    }
+  })
+  .then(function() {
+    console.info('PASS');
+  });
 ```
 
 ## dns-01 vs http-01
@@ -105,48 +106,80 @@ For `type` dns-01:
 Here's a quick pseudo stub-out of what a test-passing plugin object might look like:
 
 ```js
-tester.test('http-01', 'example.com', {
-  set: function (opts) {
-    var ch = opts.challenge;
-    // { type: 'http-01' // or 'dns-01'
-    // , identifier: { type: 'dns', value: 'example.com' }
-    // , wildcard: false
-    // , token: 'xxxx'
-    // , keyAuthorization: 'xxxx.yyyy'
-    // , dnsHost: '_acme-challenge.example.com'
-    // , dnsAuthorization: 'zzzz' }
+tester
+  .test('http-01', 'example.com', {
+  
+    set: function(opts) {
+      var ch = opts.challenge;
+      // { type: 'http-01' // or 'dns-01'
+      // , identifier: { type: 'dns', value: 'example.com' }
+      // , wildcard: false
+      // , token: 'xxxx'
+      // , keyAuthorization: 'xxxx.yyyy'
+      // , dnsHost: '_acme-challenge.example.com'
+      // , dnsAuthorization: 'zzzz' }
 
-    return API.set(...);
-  }
-, get: function (query) {
-    var ch = query.challenge;
-    // { type: 'http-01' // or 'dns-01', 'tls-alpn-01', etc
-    // , identifier: { type: 'dns', value: 'example.com' }
-    //   // http-01 only
-    // , token: 'xxxx'
-    // , url: '...' // for testing and debugging
-    //   // dns-01 only, for testing / dubgging
-    // , altname: '...'
-    // , dnsHost: '...'
-    // , wildcard: false }
-    // Note: query.identifier.value is different for http-01 than for dns-01
+      return YourApi('POST', 'https://example.com/api/dns/txt', {
+        host: ch.dnsHost,
+        record: ch.dnsAuthorization
+      });
+    },
+    
+    get: function(query) {
+      var ch = query.challenge;
+      // { type: 'http-01' // or 'dns-01', 'tls-alpn-01', etc
+      // , identifier: { type: 'dns', value: 'example.com' }
+      //   // http-01 only
+      // , token: 'xxxx'
+      // , url: '...' // for testing and debugging
+      //   // dns-01 only, for testing / dubgging
+      // , altname: '...'
+      // , dnsHost: '...'
+      // , wildcard: false }
+      // Note: query.identifier.value is different for http-01 than for dns-01
 
-    return API.get(...).then(function (secret) {
-      // http-01
-      return { keyAuthorization: secret };
-      // dns-01
-      //return { dnsAuthorization: secret };
+      return YourApi('GET', 'https://example.com/api/dns/txt', {
+        host: ch.dnsHost
+      }).then(function(secret) {
+        // http-01
+        return { keyAuthorization: secret };
+        // dns-01
+        //return { dnsAuthorization: secret };
+      });
+    },
+    
+    remove: function(opts) {
+      var ch = opts.challenge;
+      // same options as in `set()` (which are not the same as `get()`
+
+      return YourApi('DELETE', 'https://example.com/api/dns/txt/' + ch.dnsHost);
+    }
+  })
+  .then(function() {
+    console.info('PASS');
+  });
+```
+
+Where `YourApi` might look something like this:
+
+```js
+var YourApi = function createApi(config) {
+  var request = require('@root/request');
+  request = require('util').promisify(request);
+    
+  return function (method, url, body) {
+    return request({
+      method: method,
+      url: url,
+      json: body || true,
+      headers: {
+        Authorization: 'Bearer ' + config.apiToken
+      }
+    }).then(function(resp) {
+      return resp.body;
     });
   }
-, remove: function (opts) {
-    var ch = opts.challenge;
-    // same options as in `set()` (which are not the same as `get()`
-
-    return API.remove(...);
-  }
-}).then(function () {
-  console.info("PASS");
-});
+}
 ```
 
 ### Two notes:
