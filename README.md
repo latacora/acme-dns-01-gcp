@@ -9,6 +9,8 @@ The tests account for single-domain certificates (`example.com`) as well as mult
 wildcards (`*.example.com`), and valid private / localhost certificates. As someone creating a challenge strategy
 that's not something you have to take special consideration for - just pass the tests.
 
+**Node v6 Support**: Please build community plugins using node v6 / vanillajs to ensure that all acme.js and greenlock.js users are fully supported.
+
 ## Install
 
 ```bash
@@ -45,7 +47,44 @@ which you should use as a model for any plugins that you create.
 
 See `example.js` (it works).
 
-## Overview
+## Starter Template
+
+Here's what you could start with.
+
+```js
+var tester = require("acme-challenge-test");
+
+// The dry-run tests can pass on, literally, 'example.com'
+// but the integration tests require that you have control over the domain
+var domain = "example.com";
+
+tester.test("http-01", domain, {
+
+  // Should set a TXT record for opts.dnsHost with opts.dnsAuthorization for opts.ttl || 300
+  set: function (opts) {
+    console.log("set opts:", opts);
+    throw new Error("set not implemented");
+  },
+  
+  // Should remove the *one* TXT record for opts.dnsHost with opts.dnsAuthorization
+  // Should NOT remove otherrecords for opts.dnsHost (wildcard shares dnsHost with non-wildcard)
+  remove: function (opts) {
+    console.log("remove opts:", opts);
+    throw new Error("remove not implemented");
+  },
+  
+  // Should get the record via the DNS server's API
+  get: function (opts) {
+    console.log("get opts:", opts);
+    throw new Error("get not implemented");
+  }
+
+}).then(function() {
+	console.info("PASS");
+});
+```
+
+## Detailed Overview
 
 Here's a quick pseudo stub-out of what a test-passing plugin object might look like:
 
