@@ -107,7 +107,7 @@ Here's a quick pseudo stub-out of what a test-passing plugin object might look l
 
 ```js
 tester
-  .test('http-01', 'example.com', {
+  .test('dns-01', 'example.com', {
   
     set: function(opts) {
       var ch = opts.challenge;
