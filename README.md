@@ -111,7 +111,7 @@ tester
   
     set: function(opts) {
       var ch = opts.challenge;
-      // { type: 'http-01' // or 'dns-01'
+      // { type: 'dns-01' // or 'http-01'
       // , identifier: { type: 'dns', value: 'example.com' }
       // , wildcard: false
       // , token: 'xxxx'
@@ -127,7 +127,7 @@ tester
     
     get: function(query) {
       var ch = query.challenge;
-      // { type: 'http-01' // or 'dns-01', 'tls-alpn-01', etc
+      // { type: 'dns-01' // or 'http-01', 'tls-alpn-01', etc
       // , identifier: { type: 'dns', value: 'example.com' }
       //   // http-01 only
       // , token: 'xxxx'
@@ -142,9 +142,9 @@ tester
         host: ch.dnsHost
       }).then(function(secret) {
         // http-01
-        return { keyAuthorization: secret };
+        //return { keyAuthorization: secret };
         // dns-01
-        //return { dnsAuthorization: secret };
+        return { dnsAuthorization: secret };
       });
     },
     
