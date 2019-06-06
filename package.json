@@ -1,6 +1,6 @@
 {
 	"name": "acme-challenge-test",
-	"version": "3.0.3",
+	"version": "3.0.4",
 	"description": "The base set of tests for all ACME challenge strategies. Any `acme-http-01-`, `acme-dns-01-`, `acme-challenge-`, or greenlock plugin should be able to pass these tests.",
 	"main": "index.js",
 	"homepage": "https://git.rootprojects.org/root/acme-challenge-test.js",
@@ -21,7 +21,8 @@
 		"challenge",
 		"plugin",
 		"module",
-		"strategy"
+		"strategy",
+		"greenlock"
 	],
 	"author": "AJ ONeal <solderjs@gmail.com> (https://solderjs.com/)",
 	"license": "MPL-2.0"

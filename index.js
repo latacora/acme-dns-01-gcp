@@ -92,6 +92,7 @@ function run(challenger, opts) {
 				// there should only be two possible TXT records per challenge domain:
 				// one for the bare domain, and the other if and only if there's a wildcard
 				query.wildcard = ch.wildcard;
+				query.dnsAuthorization = ch.dnsAuthorization;
 			} else {
 				query = JSON.parse(JSON.stringify(ch));
 				query.comment = 'unknown challenge type, supplying everything';
