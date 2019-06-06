@@ -23,7 +23,9 @@ var tester = require("acme-challenge-test");
 
 //var challenger = require('acme-http-01-cli').create({});
 //var challenger = require('acme-dns-01-cli').create({});
-var challenger = require("./YOUR-CHALLENGE-STRATEGY").create({});
+var challenger = require("./YOUR-CHALLENGE-STRATEGY").create({
+  YOUR_TOKEN_OPTION: 'SOME_API_KEY'
+});
 
 // The dry-run tests can pass on, literally, 'example.com'
 // but the integration tests require that you have control over the domain
