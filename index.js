@@ -75,121 +75,140 @@ function run(challenger, opts) {
 
 	// The first time we just check it against itself
 	// this will cause the prompt to appear
-	return set(opts)
-		.then(function() {
-			// this will cause the final completion message to appear
-			// _test is used by the manual cli reference implementations
-			var query = { type: ch.type, /*debug*/ status: ch.status, _test: true };
-			if ('http-01' === ch.type) {
-				query.identifier = ch.identifier;
-				query.token = ch.token;
-				// For testing only
-				query.url = ch.challengeUrl;
-			} else if ('dns-01' === ch.type) {
-				query.identifier = { type: 'dns', value: ch.dnsHost };
-				// For testing only
-				query.altname = ch.altname;
-				// there should only be two possible TXT records per challenge domain:
-				// one for the bare domain, and the other if and only if there's a wildcard
-				query.wildcard = ch.wildcard;
-				query.dnsAuthorization = ch.dnsAuthorization;
-			} else {
-				query = JSON.parse(JSON.stringify(ch));
-				query.comment = 'unknown challenge type, supplying everything';
-			}
-			return get({ challenge: query })
-				.then(function(secret) {
-					if ('string' === typeof secret) {
-						console.info(
-							'secret was passed as a string, which works historically, but should be an object instead:'
-						);
-						console.info('{ "keyAuthorization": "' + secret + '" }');
-						console.info('or');
-						// TODO this should be "keyAuthorizationDigest"
-						console.info('{ "dnsAuthorization": "' + secret + '" }');
-						console.info(
-							'This is to help keep acme / greenlock (and associated plugins) future-proof for new challenge types'
+	return set(opts).then(function() {
+		// this will cause the final completion message to appear
+		// _test is used by the manual cli reference implementations
+		var query = { type: ch.type, /*debug*/ status: ch.status, _test: true };
+		if ('http-01' === ch.type) {
+			query.identifier = ch.identifier;
+			query.token = ch.token;
+			// For testing only
+			query.url = ch.challengeUrl;
+		} else if ('dns-01' === ch.type) {
+			query.identifier = { type: 'dns', value: ch.dnsHost };
+			// For testing only
+			query.altname = ch.altname;
+			// there should only be two possible TXT records per challenge domain:
+			// one for the bare domain, and the other if and only if there's a wildcard
+			query.wildcard = ch.wildcard;
+			query.dnsAuthorization = ch.dnsAuthorization;
+		} else {
+			query = JSON.parse(JSON.stringify(ch));
+			query.comment = 'unknown challenge type, supplying everything';
+		}
+		return get({ challenge: query })
+			.then(function(secret) {
+				if ('string' === typeof secret) {
+					console.info(
+						'secret was passed as a string, which works historically, but should be an object instead:'
+					);
+					console.info('{ "keyAuthorization": "' + secret + '" }');
+					console.info('or');
+					// TODO this should be "keyAuthorizationDigest"
+					console.info('{ "dnsAuthorization": "' + secret + '" }');
+					console.info(
+						'This is to help keep acme / greenlock (and associated plugins) future-proof for new challenge types'
+					);
+				}
+				// historically 'secret' has been a string, but I'd like it to transition to be an object.
+				// to make it backwards compatible in v2.7 to change it,
+				// so I'm not sure that we really need to.
+				if ('http-01' === ch.type) {
+					secret = secret.keyAuthorization || secret;
+					if (ch.keyAuthorization !== secret) {
+						throw new Error(
+							"http-01 challenge.get() returned '" +
+								secret +
+								"', which does not match the keyAuthorization" +
+								" saved with challenge.set(), which was '" +
+								ch.keyAuthorization +
+								"'"
 						);
 					}
-					// historically 'secret' has been a string, but I'd like it to transition to be an object.
-					// to make it backwards compatible in v2.7 to change it,
-					// so I'm not sure that we really need to.
-					if ('http-01' === ch.type) {
-						secret = secret.keyAuthorization || secret;
-						if (ch.keyAuthorization !== secret) {
-							throw new Error(
-								"http-01 challenge.get() returned '" +
-									secret +
-									"', which does not match the keyAuthorization" +
-									" saved with challenge.set(), which was '" +
-									ch.keyAuthorization +
-									"'"
-							);
-						}
-					} else if ('dns-01' === ch.type) {
-						secret = secret.dnsAuthorization || secret;
-						if (ch.dnsAuthorization !== secret) {
-							throw new Error(
-								"dns-01 challenge.get() returned '" +
-									secret +
-									"', which does not match the dnsAuthorization" +
-									" (keyAuthDigest) saved with challenge.set(), which was '" +
-									ch.dnsAuthorization +
-									"'"
-							);
-						}
+				} else if ('dns-01' === ch.type) {
+					secret = secret.dnsAuthorization || secret;
+					if (ch.dnsAuthorization !== secret) {
+						throw new Error(
+							"dns-01 challenge.get() returned '" +
+								secret +
+								"', which does not match the dnsAuthorization" +
+								" (keyAuthDigest) saved with challenge.set(), which was '" +
+								ch.dnsAuthorization +
+								"'"
+						);
+					}
+				} else {
+					if ('tls-alpn-01' === ch.type) {
+						console.warn(
+							"'tls-alpn-01' support is in development" +
+								" (or developed and we haven't update this yet). Please contact us."
+						);
 					} else {
-						if ('tls-alpn-01' === ch.type) {
-							console.warn(
-								"'tls-alpn-01' support is in development" +
-									" (or developed and we haven't update this yet). Please contact us."
-							);
-						} else {
-							console.warn(
-								"We don't know how to test '" +
-									ch.type +
-									"'... are you sure that's a thing?"
-							);
-						}
-						secret = secret.keyAuthorization || secret;
-						if (ch.keyAuthorization !== secret) {
-							console.warn(
-								"The returned value doesn't match keyAuthorization",
-								ch.keyAuthorization,
-								secret
-							);
-						}
+						console.warn(
+							"We don't know how to test '" +
+								ch.type +
+								"'... are you sure that's a thing?"
+						);
 					}
-				})
-				.then(function() {
-					return remove(opts).then(function() {
-						return get(opts).then(function(result) {
-							if (result) {
-								throw new Error(
-									'challenge.remove() should have made it not possible for challenge.get() to return a value'
-								);
-							}
-							if (null !== result) {
-								throw new Error(
-									'challenge.get() should return null when the value is not set'
-								);
-							}
-						});
+					secret = secret.keyAuthorization || secret;
+					if (ch.keyAuthorization !== secret) {
+						console.warn(
+							"The returned value doesn't match keyAuthorization",
+							ch.keyAuthorization,
+							secret
+						);
+					}
+				}
+			})
+			.then(function() {
+				return remove(opts).then(function() {
+					return get(opts).then(function(result) {
+						if (result) {
+							throw new Error(
+								'challenge.remove() should have made it not possible for challenge.get() to return a value'
+							);
+						}
+						if (null !== result) {
+							throw new Error(
+								'challenge.get() should return null when the value is not set'
+							);
+						}
 					});
 				});
-		})
-		.then(function() {
-			console.info('All soft tests: PASS');
-			console.warn(
-				'Hard tests (actually checking http URLs and dns records) is implemented in acme-v2.'
-			);
-			console.warn(
-				"We'll copy them over here as well, but that's a TODO for next week."
-			);
-		});
+			});
+	});
 }
 
-module.exports.test = function(type, altname, challenger) {
+module.exports.test = function(type, zone, challenger) {
+	var domains = [zone, 'foo.' + zone];
+	if ('dns-01' === type) {
+		domains.push('*.foo.' + zone);
+	}
+
+	function next() {
+		var domain = domains.shift();
+		if (!domain) {
+			return;
+		}
+		console.info("TEST '%s'", domain);
+		return testOne(type, domain, challenger).then(function() {
+			console.info("PASS '%s'", domain);
+			return next();
+		});
+	}
+
+	return next().then(function() {
+		console.info('All soft tests: PASS');
+		console.warn(
+			'Hard tests (actually checking http URLs and dns records) is implemented in acme-v2.'
+		);
+		console.warn(
+			"We'll copy them over here as well, but that's a TODO for next week."
+		);
+	});
+};
+
+function testOne(type, altname, challenger) {
 	var expires = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 	var token = crypto.randomBytes(8).toString('hex');
 	var thumb = crypto.randomBytes(16).toString('hex');
@@ -212,7 +231,7 @@ module.exports.test = function(type, altname, challenger) {
 		thumbprint: thumb,
 		keyAuthorization: keyAuth,
 		url: null, // completed below
-		dnsHost: '_acme-challenge.', // completed below
+		dnsHost: '_acme-challenge-' + token.slice(0, 4) + '.', // completed below
 		dnsAuthorization: dnsAuth,
 		altname: altname,
 		_test: true // used by CLI referenced implementations
@@ -227,4 +246,6 @@ module.exports.test = function(type, altname, challenger) {
 	challenge.dnsHost += altname;
 
 	return run(challenger, { challenge: challenge });
-};
+}
+
+module.exports._test = testOne;

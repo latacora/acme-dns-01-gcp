@@ -1,10 +1,10 @@
-"use strict";
+'use strict';
 
 //var tester = require('acme-challenge-test');
-var tester = require("./");
+var tester = require('./');
 
-var type = "http-01";
-var challenger = require("acme-http-01-cli").create({});
+var type = 'http-01';
+var challenger = require('acme-http-01-cli').create({});
 //var type = 'dns-01';
 //var challenger = require('acme-dns-01-cli').create({});
 //var challenger = require('./YOUR-CHALLENGE-STRATEGY').create({});
@@ -12,16 +12,15 @@ var challenger = require("acme-http-01-cli").create({});
 
 // The dry-run tests can pass on, literally, 'example.com'
 // but the integration tests require that you have control over the domain
-var domain = "example.com";
-//var domain = '*.example.com';
+var zone = 'example.com';
 
 tester
-	.test(type, domain, challenger)
+	.test(type, zone, challenger)
 	.then(function() {
-		console.info("PASS");
+		console.info('ALL PASSED');
 	})
 	.catch(function(err) {
-		console.error("FAIL");
+		console.error('FAIL');
 		console.error(err);
 		process.exit(20);
 	});
