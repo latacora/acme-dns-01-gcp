@@ -179,7 +179,7 @@ function run(challenger, opts) {
 	});
 }
 
-module.exports.test = function(type, zone, challenger) {
+function testZone(type, zone, challenger) {
 	var domains = [zone, 'foo.' + zone];
 	if ('dns-01' === type) {
 		domains.push('*.foo.' + zone);
@@ -191,7 +191,7 @@ module.exports.test = function(type, zone, challenger) {
 			return;
 		}
 		console.info("TEST '%s'", domain);
-		return testOne(type, domain, challenger).then(function() {
+		return testRecord(type, domain, challenger).then(function() {
 			console.info("PASS '%s'", domain);
 			return next();
 		});
@@ -208,7 +208,7 @@ module.exports.test = function(type, zone, challenger) {
 	});
 };
 
-function testOne(type, altname, challenger) {
+function testRecord(type, altname, challenger) {
 	var expires = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 	var token = crypto.randomBytes(8).toString('hex');
 	var thumb = crypto.randomBytes(16).toString('hex');
@@ -248,4 +248,6 @@ function testOne(type, altname, challenger) {
 	return run(challenger, { challenge: challenge });
 }
 
-module.exports._test = testOne;
+module.exports.testRecord = testRecord;
+module.exports.testZone = testZone;
+module.exports.test = testZone;
