@@ -76,10 +76,11 @@ function testEach(type, domains, challenger) {
 	var all = domains.map(function(d) {
 		return { domain: d };
 	});
+	var rnd = crypto.randomBytes(2).toString('hex');
 
 	return mapAsync(all, function(opts) {
 		console.info("TEST '%s'", opts.domain);
-		opts.challenge = getChallenge(type, opts.domain);
+		opts.challenge = fakeChallenge(type, opts.domain, rnd);
 		var ch = opts.challenge;
 		if ('http-01' === ch.type && ch.wildname) {
 			throw new Error('http-01 cannot be used for wildcard domains');
@@ -234,7 +235,7 @@ function wrapChallenger(challenger) {
 	return { set: set, get: get, remove: remove };
 }
 
-function getChallenge(type, altname) {
+function fakeChallenge(type, altname, rnd) {
 	var expires = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 	var token = crypto.randomBytes(8).toString('hex');
 	var thumb = crypto.randomBytes(16).toString('hex');
@@ -257,7 +258,7 @@ function getChallenge(type, altname) {
 		thumbprint: thumb,
 		keyAuthorization: keyAuth,
 		url: null, // completed below
-		dnsHost: '_acme-challenge-' + token.slice(0, 4) + '.', // completed below
+		dnsHost: '_' + rnd.slice(0, 2) + '-acme-challenge-' + rnd.slice(2) + '.', // completed below
 		dnsAuthorization: dnsAuth,
 		altname: altname,
 		_test: true // used by CLI referenced implementations

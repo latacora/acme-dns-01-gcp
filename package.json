@@ -1,9 +1,13 @@
 {
 	"name": "acme-challenge-test",
-	"version": "3.1.1",
+	"version": "3.1.2",
 	"description": "The base set of tests for all ACME challenge strategies. Any `acme-http-01-`, `acme-dns-01-`, `acme-challenge-`, or greenlock plugin should be able to pass these tests.",
 	"main": "index.js",
 	"homepage": "https://git.rootprojects.org/root/acme-challenge-test.js",
+	"files": [
+		"example.js",
+		"lib"
+	],
 	"dependencies": {},
 	"devDependencies": {},
 	"scripts": {
