@@ -1,9 +1,9 @@
 {
 	"name": "acme-dns-01-test",
-	"version": "3.2.0",
+	"version": "3.2.1",
 	"description": "ACME dns-01 tests for Let's Encrypt integration. Any `acme-dns-01-` plugin should be able to pass these tests.",
 	"main": "index.js",
-	"homepage": "https://git.rootprojects.org/root/acme-challenge-test.js",
+	"homepage": "https://git.rootprojects.org/root/acme-dns-01-test.js",
 	"files": [
 		"example.js",
 		"lib"
@@ -19,12 +19,11 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://git.rootprojects.org/root/acme-challenge-test.js.git"
+		"url": "https://git.rootprojects.org/root/acme-dns-01-test.js.git"
 	},
 	"keywords": [
 		"Let's Encrypt",
 		"ACME",
-		"http-01",
 		"dns-01",
 		"challenge",
 		"plugin",
