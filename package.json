@@ -1,15 +1,19 @@
 {
-	"name": "acme-challenge-test",
-	"version": "3.1.2",
-	"description": "The base set of tests for all ACME challenge strategies. Any `acme-http-01-`, `acme-dns-01-`, `acme-challenge-`, or greenlock plugin should be able to pass these tests.",
+	"name": "acme-dns-01-test",
+	"version": "3.2.0",
+	"description": "ACME dns-01 tests for Let's Encrypt integration. Any `acme-dns-01-` plugin should be able to pass these tests.",
 	"main": "index.js",
 	"homepage": "https://git.rootprojects.org/root/acme-challenge-test.js",
 	"files": [
 		"example.js",
 		"lib"
 	],
-	"dependencies": {},
-	"devDependencies": {},
+	"dependencies": {
+		"acme-challenge-test": "^3.2.0"
+	},
+	"devDependencies": {
+		"acme-dns-01-cli": "^3.1.0"
+	},
 	"scripts": {
 		"test": "node example.js"
 	},
