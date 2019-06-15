@@ -1,6 +1,6 @@
 {
 	"name": "acme-dns-01-test",
-	"version": "3.2.1",
+	"version": "3.3.0",
 	"description": "ACME dns-01 tests for Let's Encrypt integration. Any `acme-dns-01-` plugin should be able to pass these tests.",
 	"main": "index.js",
 	"homepage": "https://git.rootprojects.org/root/acme-dns-01-test.js",
@@ -9,7 +9,7 @@
 		"lib"
 	],
 	"dependencies": {
-		"acme-challenge-test": "^3.2.0"
+		"acme-challenge-test": "^3.3.1"
 	},
 	"devDependencies": {
 		"acme-dns-01-cli": "^3.1.0"
