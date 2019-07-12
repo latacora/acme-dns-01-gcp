@@ -72,6 +72,8 @@ These libraries are useful as a model for any plugins that you create.
   - [`cli`](https://git.rootprojects.org/root/acme-dns-01-cli.js)
   - [`digitalocean`](https://git.rootprojects.org/root/acme-dns-01-digitalocean.js)
   - [`vultr`](https://git.rootprojects.org/root/acme-dns-01-vultr.js)
+  - [`gandi`](https://git.rootprojects.org/root/acme-dns-01-gandi.js)
+  - [`duckdns`](https://git.rootprojects.org/root/acme-dns-01-duckdns.js)
 - http-01
   - [`cli`](https://git.rootprojects.org/root/acme-http-01-cli.js)
   - [`fs`](https://git.rootprojects.org/root/acme-http-01-fs.js)
