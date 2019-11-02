@@ -1,41 +1,208 @@
-# [acme-dns-01-test](https://git.rootprojects.org/root/acme-dns-01-test.js.git) | a [Root](https://rootprojects.org) project
+# Let's Encrypt + DNS = [acme-dns-01-test](https://git.rootprojects.org/root/acme-dns-01-test.js.git)
+
+| Built by [Root](https://rootprojects.org) for [Hub](https://rootprojects.org/hub/)
 
 An ACME dns-01 test harness for Let's Encrypt integrations.
 
-This was specificially designed for [ACME.js](https://git.coolaj86.com/coolaj86/acme-v2.js) and [Greenlock.js](https://git.coolaj86.com/coolaj86/greenlock-express.js), but will be generically useful to any ACME module.
+| [ACME HTTP-01](https://git.rootprojects.org/root/acme-http-01-test.js)
+| [ACME DNS-01](https://git.rootprojects.org/root/acme-dns-01-test.js)
+| [Greenlock Express](https://git.rootprojects.org/root/greenlock-express.js)
+| [Greenlock.js](https://git.rootprojects.org/root/greenlock.js)
+| [ACME.js](https://git.rootprojects.org/root/acme.js)
 
-Passing the tests is very easy. There are just five functions to implement:
-
-- `init(deps)` - (optional) this gives you the `request` object you should use for HTTP APIs
-- `zones(opts)` - list domain zones (i.e. example.co.uk, example.com)
-- `set(opts)` - set a TXT record in a zone (i.e. `_acme-challenge.foo` in `example.co.jp`)
-- `get(opts)` - confirm that the record was set
-- `remove(opts)` - clean up after the ACME challenge completes
-
-The tests account for single-domain certificates (`example.com`) as well as multiple domain certs (SAN / AltName),
-wildcards (`*.example.com`), and valid private / localhost certificates. No worries on your end, just pass the tests. 👌
-
-**Node v6 Support**: Please build community plugins using node v6 / vanillajs
-to ensure that all acme.js and greenlock.js users are fully supported.
-
-## Install
+This was specificially designed for [ACME.js](https://git.coolaj86.com/coolaj86/acme-v2.js)
+and [Greenlock.js](https://git.coolaj86.com/coolaj86/greenlock-express.js),
+but will be generically useful to any JavaScript DNS plugin for Let's Encrypt.
 
 ```bash
 npm install --save-dev acme-dns-01-test@3.x
 ```
 
-## Usage
+<!--
+
+```bash
+npx acme-dns-01-test --module /path/to/module.js --foo-user --bar--token
+```
+
+-->
+
+# How Let's Encrypt works with DNS
+
+In order to validate **wildcard**, **localhost**, and **private domains** through Let's Encrypt,
+you must use set some special TXT records in your domain's DNS.
+
+This is called the **ACME DNS-01 Challenge**
+
+For example:
+
+```txt
+dig TXT example.com
+
+;; QUESTION SECTION:
+;_acme-challenge.example.com.		IN	TXT
+
+;; ANSWER SECTION:
+_acme-challenge.example.com.	300	IN	TXT	"xxxxxxx"
+_acme-challenge.example.com.	300	IN	TXT	"xxxxxxx"
+```
+
+## ACME DNS-01 Challenge Process
+
+The ACME DNS-01 Challenge process works like this:
+
+1. The ACME client order's an SSL Certificate from Let's Encrypt
+2. Let's Encrypt asks for validation of the domains on the certificate
+3. The ACME client asks to use DNS record verification
+4. Let's Encrypt gives a DNS authorization token
+5. The ACME client manipulates the token and sets TXT record with the result
+6. Let's Encrypt checks the TXT record from DNS clients in diverse locations
+7. The ACME client gets a certificate if the validate passes
+
+# Using a Let's Encrypt DNS plugin
+
+Each plugin will define some options, such as an api key, or username and password
+that are specific to that plugin.
+
+Other than that, they're all used the same.
+
+## ACME.js + Let's Encrypt DNS-01
+
+This is how an ACME challenge module is with ACME.js:
+
+```js
+acme.certificates.create({
+	accountKey,
+	csr,
+	domains,
+	challenges: {
+		'dns-01': require('acme-dns-01-MODULE_NAME').create({
+			fooUser: 'A_PLUGIN_SPECIFIC_OPTION',
+			barToken: 'A_PLUGIN_SPECIFIC_OPTION'
+		})
+	}
+});
+```
+
+## Greenlock + Let's Encrypt DNS-01
+
+This is how modules are used with Greenlock / Greenlock Express
+
+**Global** default:
+
+```js
+greenlock.manager.defaults({
+	challenges: {
+		'dns-01': {
+			module: 'acme-dns-01-_MODULE_NAME',
+			fooUser: 'A_PLUGIN_SPECIFIC_OPTION',
+			barToken: 'A_PLUGIN_SPECIFIC_OPTION'
+		}
+	}
+});
+```
+
+**Per-Site** config:
+
+```js
+greenlock.add({
+	subject: 'example.com',
+	altnames: ['example.com', '*.example.com', 'foo.bar.example.com'],
+	challenges: {
+		'dns-01': {
+			module: 'acme-dns-01-YOUR_MODULE_NAME',
+			fooUser: 'A_PLUGIN_SPECIFIC_OPTION',
+			barToken: 'A_PLUGIN_SPECIFIC_OPTION'
+		}
+	}
+});
+```
+
+# The Easy Way to Build a Plugin
+
+This repo includes **unit test suite** which makes it _very_ easy to create a plugin.
+
+You can start with a **template file** that will fail all of the tests, and just
+build until you pass all of the tests.
+
+After that, you can **test the Greenlock CLI** to see if
+you actually get a valid SSL certificate.
+
+## Overview
+
+There are only a few methods to implement - just basic CRUD operations.
+
+For most serivices these are very simple to implement
+(see the **reference implementations** down below).
+
+Some enterprise-y services are more difficult as they may have special
+rules about zones (Google Cloud) or intricate authentication schemes (AWS).
+
+```
+init({ request })
+
+zones({ dnsHosts })
+
+set({ challenge: { dnsZone, dnsPrefix, dnsHost, keyAuthorizationDigest } })
+
+get({ challenge: { dnsZone, dnsPrefix, dnsHost, keyAuthorizationDigest } })
+
+remove({ challenge: { dnsZone, dnsPrefix, dnsHost, keyAuthorizationDigest } })
+```
+
+## Plugin Outline
+
+This is an even better starter template below,
+but this outline shows the bare bones of a plugin.
+
+```
+'use strict';
+
+var MyModule = module.exports;
+
+MyModule.create = function (options) {
+
+    var m = {};
+
+    m.init = async function ({ request }) {
+        // (optional) initialize your module
+    }
+
+    m.zones = async function ({ dnsHosts }) {
+        // return a list of "Zones" or "Apex Domains" (i.e. example.com, NOT foo.example.com)
+    }
+
+    m.set = async function ({ challenge: { dnsZone, dnsPrefix, dnsHost, keyAuthorizationDigest } }) {
+        // set a TXT record for dnsHost with keyAuthorizationDigest as the value
+    }
+
+    m.get = async function ({ challenge: { dnsZone, dnsPrefix, dnsHost, keyAuthorizationDigest } }) {
+        // check that the EXACT a TXT record that was set, exists, and return it
+    }
+
+    m.remove = async function ({ challenge: { dnsZone, dnsPrefix, dnsHost, keyAuthorizationDigest } }) {
+        // remove the exact TXT record that was set
+    }
+
+    return m;
+}
+```
+
+## Using the Test Suite
+
+Test setup:
 
 ```js
 var tester = require('acme-dns-01-test');
+var YOUR_PLUGIN = require('./YOUR-CHALLENGE-STRATEGY');
 
-//var challenger = require('acme-dns-01-cli').create({});
-var challenger = require('./YOUR-CHALLENGE-STRATEGY').create({
+var challenger = YOUR_PLUGIN.create({
 	YOUR_TOKEN_OPTION: 'SOME_API_KEY'
 });
+```
 
-// The dry-run tests can pass on, literally, 'example.com'
-// but the integration tests require that you have control over the domain
+Run the tests:
+
+```
 var zone = 'example.com';
 
 tester.testZone('dns-01', zone, challenger).then(function() {
@@ -43,8 +210,11 @@ tester.testZone('dns-01', zone, challenger).then(function() {
 });
 ```
 
-**Note**: If the service you are testing only handles individual records
-(not multiple records in a zone), you can use `testRecord` instead:
+**Note**: Special DNS services, like **DuckDNS**, only give you a **single sub-domain**,
+not a full "zone". You can test them too:
+
+Some DNS services, such as **DuckDNS**, only give you a **single sub-domain**,
+not not _multiple_ records in a zone. Testing them is slightly different:
 
 ```js
 var record = 'foo.example.com';
@@ -88,7 +258,7 @@ We may like to co-author and help maintain and promote your module.
 browser compatibility. Other than than, if you keep your code simple, it will also work in browser
 implementations of ACME.js.</small>
 
-## Example
+# Example
 
 See `example.js` (it works).
 
@@ -102,7 +272,7 @@ var tester = require('acme-dns-01-test');
 // The dry-run tests can pass on, literally, 'example.com'
 // but the integration tests require that you have control over the domain
 var zone = 'example.com';
-var request;
+var deps = {};
 
 tester
 	.testZone('dns-01', zone, {
@@ -145,41 +315,23 @@ tester
 	});
 ```
 
-## dns-01 vs http-01
-
-For `type` dns-01:
-
-    // `dnsHost` is the domain/subdomain/host
-    // `dnsAuthorization` is the value of the TXT record
-    // `dnsPrefix` is the record-only part, if `zones()` is implemented
-    // `dnsZone` is the zone-only part, if `zones()` is implemented
-
-For `type` http-01:
-
-    // `altname` is the name of the domain
-    // `token` is the name of the file ( .well-known/acme-challenge/`token` )
-    // `keyAuthorization` is the contents of the file
-
-See [acme-http-01-test.js](https://git.rootprojects.org/root/acme-dns-01-test.js.git).
-
-## Detailed Overview
+## Full Detailed Example
 
 Here's a quick pseudo stub-out of what a test-passing plugin object might look like:
 
 ```js
-var request;
+var deps = {};
 
 tester
 	.testZone('dns-01', 'example.com', {
-		init: function(deps) {
-			// { request: { get, post, put, delete }
-			// }
+		init: function({ request }) {
+			// { request: { get, post, put, delete } }
 
-			request = deps.request;
+			deps.request = request;
 			return null;
 		},
 
-		zones: function(opts) {
+		zones: function({ dnsHosts }) {
 			// { dnsHosts: [
 			//     '_acme-challenge.foo.example.com',
 			//     '_acme-challenge.bar.example.com'
@@ -283,3 +435,11 @@ Note 2:
 - When `altname` is `foo.example.com` the `dnsHost` will be `_acme-challenge.foo.example.com`
 - When `altname` is `*.foo.example.com` the `dnsHost` will _still_ be `_acme-challenge.foo.example.com`!!
 - When `altname` is `bar.foo.example.com` the `dnsHost` will be `_acme-challenge.bar.foo.example.com`
+
+# We Build Let's Encrypt Plugins for You
+
+Want to get the experts involved? [Contact Root](acme-plugins@therootcompany.com)
+
+We can take it on ourselves, work within your team, or guide an outsourced team.
+
+Turaround is typically a few days for simple modules with publicly available APIs.

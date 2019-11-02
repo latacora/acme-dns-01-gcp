@@ -1,6 +1,6 @@
 {
 	"name": "acme-dns-01-test",
-	"version": "3.3.1",
+	"version": "3.3.2",
 	"description": "ACME dns-01 tests for Let's Encrypt integration. Any `acme-dns-01-` plugin should be able to pass these tests.",
 	"main": "index.js",
 	"homepage": "https://git.rootprojects.org/root/acme-dns-01-test.js",
