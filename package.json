@@ -5,8 +5,7 @@
 	"main": "index.js",
 	"homepage": "TBD",
 	"files": [
-		"example.js",
-		"lib"
+		"index.js"
 	],
 	"dependencies": {
 		"@google-cloud/dns": "^1.2.8",
@@ -17,7 +16,7 @@
 		"acme-dns-01-test": "^3.3.2"
 	},
 	"scripts": {
-		"test": "node example.js"
+		"test": "node test.js"
 	},
 	"repository": {
 		"type": "git",
