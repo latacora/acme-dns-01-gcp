@@ -1,13 +1,20 @@
 'use strict';
 
 //var tester = require('acme-dns-01-test');
-var tester = require('./');
+var tester = require('acme-dns-01-test');
 
 var type = 'dns-01';
-var challenger = require('acme-dns-01-cli').create({});
+
+
+// You will need access to GCP.
+var projectId = "gcp-project-placeholder"
+var zonename = "gcp-zonename"
+
+var challenger = require('./').create({projectId, zonename});
 
 // The dry-run tests can pass on, literally, 'example.com'
 // but the integration tests require that you have control over the domain
+// You should replace example.com with something you have control over. sub-domains seems to work too.
 var zone = 'example.com';
 
 tester

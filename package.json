@@ -1,18 +1,20 @@
 {
-	"name": "acme-dns-01-test",
-	"version": "3.3.2",
-	"description": "ACME dns-01 tests for Let's Encrypt integration. Any `acme-dns-01-` plugin should be able to pass these tests.",
+	"name": "acme-dns-01-gcp",
+	"version": "0.0.1",
+	"description": "ACME dns-01 GCP for Let's Encrypt integration.",
 	"main": "index.js",
-	"homepage": "https://git.rootprojects.org/root/acme-dns-01-test.js",
+	"homepage": "TBD",
 	"files": [
 		"example.js",
 		"lib"
 	],
 	"dependencies": {
+		"@google-cloud/dns": "^1.2.8",
 		"acme-challenge-test": "^3.3.1"
 	},
 	"devDependencies": {
-		"acme-dns-01-cli": "^3.1.0"
+		"acme-dns-01-cli": "^3.0.7",
+		"acme-dns-01-test": "^3.3.2"
 	},
 	"scripts": {
 		"test": "node example.js"
@@ -29,8 +31,9 @@
 		"plugin",
 		"module",
 		"strategy",
-		"greenlock"
+		"greenlock",
+		"GCP"
 	],
-	"author": "AJ ONeal <solderjs@gmail.com> (https://solderjs.com/)",
+	"author": "Renzo Tomlinson (rttomlinson@gmail.com/rtomlinson@latacora.com",
 	"license": "MPL-2.0"
 }
