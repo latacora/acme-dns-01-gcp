@@ -1,8 +1,6 @@
-# Let's Encrypt + DNS = [acme-dns-01-test](https://git.rootprojects.org/root/acme-dns-01-test.js.git)
+# Let's Encrypt + DNS = acme-dns-01-gcp
 
-| Built by [Root](https://rootprojects.org) for [Hub](https://rootprojects.org/hub/)
-
-An ACME dns-01 test harness for Let's Encrypt integrations.
+An ACME acme-dns-01-gcp for Let's Encrypt integrations.
 
 | [ACME HTTP-01](https://git.rootprojects.org/root/acme-http-01-test.js)
 | [ACME DNS-01](https://git.rootprojects.org/root/acme-dns-01-test.js)
@@ -15,9 +13,10 @@ and [Greenlock.js](https://git.coolaj86.com/coolaj86/greenlock-express.js),
 but will be generically useful to any JavaScript DNS plugin for Let's Encrypt.
 
 ```bash
-npm install --save-dev acme-dns-01-test@3.x
+npm install acme-dns-01-gcp
 ```
 
+TODO: Pass credentials to plugin. Currently relies on the default Google Cloud authentication strategy used by the Javascript SDKs. Specifically google-cloud/dns.
 <!--
 
 ```bash
@@ -25,6 +24,15 @@ npx acme-dns-01-test --module /path/to/module.js --foo-user --bar--token
 ```
 
 -->
+
+Possible Bug-
+There's some weird (possibly) race-condition bug that I can't consistently reproduce.
+```
+Error: Error: Failed DNS-01 Pre-Flight Dry Run.
+dig TXT '_acme-challenge.placeholder.com' does not return 'DqPO62S1j4s--KIY3wzYL7Ums8UvI_-BrNB7bFETJ88'
+```
+I think the side-effect is that sometimes the dns record doesn't get deleted which is a problem.
+
 
 # How Let's Encrypt works with DNS
 
