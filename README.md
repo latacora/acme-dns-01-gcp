@@ -25,15 +25,6 @@ npx acme-dns-01-test --module /path/to/module.js --foo-user --bar--token
 
 -->
 
-Possible Bug-
-There's some weird (possibly) race-condition bug that I can't consistently reproduce.
-```
-Error: Error: Failed DNS-01 Pre-Flight Dry Run.
-dig TXT '_acme-challenge.placeholder.com' does not return 'DqPO62S1j4s--KIY3wzYL7Ums8UvI_-BrNB7bFETJ88'
-```
-I think the side-effect is that sometimes the dns record doesn't get deleted which is a problem.
-
-
 # How Let's Encrypt works with DNS
 
 In order to validate **wildcard**, **localhost**, and **private domains** through Let's Encrypt,
