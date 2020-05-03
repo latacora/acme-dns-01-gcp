@@ -14,14 +14,14 @@ console.log("Be sure you've created a .env file with the GCP_PROJECT_ID and GCP_
 
 var projectId = process.env.GCP_PROJECT_ID
 var zonename = process.env.GCP_ZONE_ID
+var credentials = process.env.CREDENTIALS_FILEPATH
 
-var challenger = require('./').create({projectId, zonename});
+var challenger = require('./').create({projectId, zonename, credentials});
 
 // The dry-run tests can pass on, literally, 'example.com'
 // but the integration tests require that you have control over the domain
 // You should replace example.com with something you have control over. sub-domains seems to work too.
-var zone = process.env.DOMAIN_NAME;
-
+var zone = process.env.DOMAIN_NAME ? process.env.DOMAIN_NAME : "example.com";
 tester
 	// Will test these domain records
 	// - example.com
