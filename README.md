@@ -1,3 +1,5 @@
+This is a fork. Contact Root for questions regarding Greenlock.js, ACME.js and building Let's Encrypt Plugins
+
 # Let's Encrypt + DNS = acme-dns-01-gcp
 
 An ACME acme-dns-01-gcp for Let's Encrypt integrations.
@@ -16,7 +18,15 @@ but will be generically useful to any JavaScript DNS plugin for Let's Encrypt.
 npm install acme-dns-01-gcp
 ```
 
-TODO: Pass credentials to plugin. Currently relies on the default Google Cloud authentication strategy used by the Javascript SDKs. Specifically google-cloud/dns.
+ENV VARS:
+GCP_PROJECT_ID - Google Cloud project id
+GCP_ZONE_ID - Google Cloud DNS zone name
+OPTIONAL:
+CREDENTIALS_FILEPATH=/path/to/service/account/credentials.json - Use to specify service account credentials file on your local machine. Otherwise, the default GCP authentication look-up strategy will be used.
+
+Test only:
+DOMAIN_NAME=placeholder.com
+
 <!--
 
 ```bash

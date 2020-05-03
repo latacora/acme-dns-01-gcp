@@ -2,14 +2,17 @@
 // Imports the Google Cloud client library
 // Wherever this code is running will need to access credentials for GCP
 // https://cloud.google.com/docs/authentication/production#finding_credentials_automatically
-// You can run this on your local machine as long as you have a way to get the google-cloud libs credentials
+// You can run this on your local machine as long as you have a way to get google-cloud credentials
 
 const { DNS } = require('@google-cloud/dns');
-
+const fs = require('fs');
 module.exports.create = function (config) {
 	const projectId = config.projectId;
+	// if credentials filepath is defined, assume json and read into an object. Could consider other ways to lookup credentials
+	const credentials = config.credentials ? JSON.parse(fs.readFileSync(config.credentials)) : void(0)
 	const dns = new DNS({
-		projectId
+		projectId,
+		credentials
 	});
 	const zonename = config.zonename;
 
