@@ -2,6 +2,32 @@ This is a fork. Contact Root for questions regarding Greenlock.js, ACME.js and b
 
 # Let's Encrypt + DNS = acme-dns-01-gcp
 
+This is how to create an ACME challenge module for acme-dns-01-gcp with ACME.js:
+
+```js
+acme.certificates.create({
+	account,
+	accountKey,
+	csr,
+	domains,
+	challenges: {
+		'dns-01': require('acme-dns-01-gcp').create({
+			projectId: 'Project Id of GCP project where Cloud DNS lives',
+			zonename: 'Cloud DNS zone name',
+			credentials: 'OPTIONAL: Path to service account credentials'
+		})
+	}
+});
+```
+
+Environment Variables for testing:  
+Required:  
+* GCP_PROJECT_ID - Google Cloud project id  
+* GCP_ZONE_ID - Google Cloud DNS zone name  
+* DOMAIN_NAME=placeholder.com  
+Optional:  
+* CREDENTIALS_FILEPATH=/path/to/service/account/credentials.json - Use to specify a service account credentials file on your local machine. Otherwise, the default GCP authentication strategy will be used.  
+
 An ACME acme-dns-01-gcp for Let's Encrypt integrations.
 
 | [ACME HTTP-01](https://git.rootprojects.org/root/acme-http-01-test.js)
@@ -16,16 +42,7 @@ but will be generically useful to any JavaScript DNS plugin for Let's Encrypt.
 
 ```bash
 npm install acme-dns-01-gcp
-```
-
-ENV VARS:
-GCP_PROJECT_ID - Google Cloud project id
-GCP_ZONE_ID - Google Cloud DNS zone name
-OPTIONAL:
-CREDENTIALS_FILEPATH=/path/to/service/account/credentials.json - Use to specify service account credentials file on your local machine. Otherwise, the default GCP authentication look-up strategy will be used.
-
-Test only:
-DOMAIN_NAME=placeholder.com
+```  
 
 <!--
 
