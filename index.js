@@ -9,12 +9,16 @@ const fs = require('fs');
 module.exports.create = function (config) {
 	const projectId = config.projectId;
 	// if credentials filepath is defined, assume json and read into an object. Could consider other ways to lookup credentials
-	const credentials = config.credentials ? JSON.parse(fs.readFileSync(config.credentials)) : void(0)
+	const credentials = (typeof config.credentials === "string") ?
+		JSON.parse(fs.readFileSync(config.credentials)) :
+		config.credentials;
+
 	const dns = new DNS({
 		projectId,
 		credentials
 	});
 	const zonename = config.zonename;
+	const propagationDelay = config.propagationDelay || 5000;
 
 	// set and delete need to acquire the same lock for each of the commands
 	const domainLock = {};
@@ -51,6 +55,7 @@ module.exports.create = function (config) {
 	}
 
 	return {
+		propagationDelay: propagationDelay,
 		init: async function (opts) {
 			console.log('init function called...');
 			return null;
