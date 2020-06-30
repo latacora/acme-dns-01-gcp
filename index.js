@@ -63,7 +63,7 @@ module.exports.create = function (config) {
 				const dnsName = metadataResponse[0]['dnsName'];
 				return [dnsName.slice(0, -1)]; // to remove the "." on the end
 			} catch (err) {
-				console.error('ERROR in zones:', err);
+				console.error('ZONES: ERROR in zones:', err);
 				return null;
 			}
 		},
@@ -90,11 +90,11 @@ module.exports.create = function (config) {
 				const [recordResponse] = await zone.getRecords(query);
 				if (recordResponse.length == 0) {
 					//nothing found
-					console.log('no records found for recordDnsName: ', recordDnsName);
-					console.log('creating new record entry....');
+					console.log('SET: No records found for recordDnsName: ', recordDnsName);
+					console.log('SET: Creating new record entry....');
 					data = [txt];
 				} else {
-					console.log('we found existing records');
+					console.log('SET: Existing records found');
 					let existingRecord = recordResponse[0];
 					data = existingRecord.data.slice();
 
@@ -102,19 +102,19 @@ module.exports.create = function (config) {
 					//I'm going to assume that strings are wrapped in quotes and drop the first and last char of each value.
 
 					data = data.map((x) => x.slice(1, -1));
-					console.log('old data in set: ', data);
+					console.log('SET: Old data in set: ', data);
 					if (data.includes(txt)) {
 						console.log(
-							'authorization code has already been added to the txt record for :' +
+							'SET: Authorization code has already been added to the txt record for :' +
 								recordDnsName +
 								' Something is probably wrong.'
 						);
-						console.log('exiting...');
+						console.log('SET: Exiting...');
 						return null;
 					}
 
 					data.push(txt); // add the authorization code to data array
-					console.log('new data in set: ', data);
+					console.log('SET: New data in set: ', data);
 					// there isn't a way to "update" a record set, so we have to delete then add it back. I guess we'll just add a timer to wait between the delete and add steps
 					const [createChangeResponse] = await existingRecord.delete();
 					let [deleteChangeMetadata] = await createChangeResponse.getMetadata();
@@ -127,7 +127,7 @@ module.exports.create = function (config) {
 							throw 'timeout for dns record delete. You probably need to fix something manually now.';
 						}
 						console.log(
-							'delete status pending, will try up to 10 times. currently at attempt: ' +
+							'SET: Delete status pending, will try up to 10 times. currently at attempt: ' +
 								a
 						);
 						await new Promise((r) => setTimeout(r, 5000));
@@ -135,7 +135,7 @@ module.exports.create = function (config) {
 						changeStatus = changeMetadata.status;
 						a++;
 					}
-					console.log('record delete should be done');
+					console.log('SET: Record delete should be done');
 				}
 
 				const record = zone.record('txt', {
@@ -154,7 +154,7 @@ module.exports.create = function (config) {
 						throw 'timeout for dns record set. You probably need to fix something manually now.';
 					}
 					console.log(
-						'add status pending, will try up to 10 times. currently at attempt: ' +
+						'SET: Add status pending, will try up to 10 times. currently at attempt: ' +
 							a
 					);
 					await new Promise((r) => setTimeout(r, 5000));
@@ -162,13 +162,12 @@ module.exports.create = function (config) {
 					changeStatus = changeMetadata.status;
 					a++;
 				}
-				console.log('record set should be done');
-				console.log('record updated or added');
+				console.log('SET: Record updated or added');
 				return changeId;
 			} catch (err) {
-				console.error('Error trying to add a record');
+				console.error('SET: Error trying to add a record');
 				//
-				console.error('ERROR in set:', err);
+				console.error('SET: ERROR in set:', err);
 				return null;
 			} finally {
 				await releaseLock(recordDnsName);
@@ -185,7 +184,7 @@ module.exports.create = function (config) {
 				type: 'TXT'
 			};
 			try {
-				console.log('Trying to get txt record for ' + recordDnsName);
+				console.log('GET: Trying to get txt record for ' + recordDnsName);
 				const [recordsResponse] = await zone.getRecords(query);
 				if (recordsResponse.length == 0) {
 					//just to make  it explicit
@@ -199,8 +198,8 @@ module.exports.create = function (config) {
 
 				data = data.map((x) => x.slice(1, -1));
 				if (!data.includes(dnsAuthorization)) {
-					console.log('We didnt find the dnsAuthorization text in the records');
-					console.log('exiting...');
+					console.log('GET: We didnt find the dnsAuthorization text in the records');
+					console.log('GET: exiting...');
 					return null;
 				}
 
@@ -209,7 +208,7 @@ module.exports.create = function (config) {
 					dnsAuthorization
 				};
 			} catch (err) {
-				console.error('Error trying to GET the txt record');
+				console.error('GET: Error trying to GET the txt record');
 				console.error(err);
 				return null;
 			}
@@ -228,17 +227,17 @@ module.exports.create = function (config) {
 					name: recordDnsName,
 					type: 'TXT'
 				};
-				console.log('Getting the records in REMOVE');
+				console.log('REMOVE: Getting the records in REMOVE');
 
 				const [recordResponse] = await zone.getRecords(query);
 				if (recordResponse.length == 0) {
 					//nothing found
-					console.log('no records found for recordDnsName: ', recordDnsName);
-					console.log('deleting record entry....');
+					console.log('REMOVE: no records found for recordDnsName: ', recordDnsName);
+					console.log('REMOVE: exiting....');
 					return null;
 				}
 
-				console.log('attempting to delete record...');
+				console.log('REMOVE: Attempting to delete record...');
 
 				// check the data response
 				let record = recordResponse[0];
@@ -251,8 +250,8 @@ module.exports.create = function (config) {
 				data = data.map((x) => x.slice(1, -1));
 				// check to see if dnsAuthorization is in data
 				if (!data.includes(dnsAuthorization)) {
-					console.log('We didnt find the dnsAuthorization text in the records');
-					console.log('exiting...');
+					console.log('REMOVE: We didnt find the dnsAuthorization text in the records');
+					console.log('REMOVE: Possible that it has already been removed. Exiting...');
 					return null;
 				}
 				const [createChangeResponse] = await record.delete();
@@ -266,7 +265,7 @@ module.exports.create = function (config) {
 						throw 'timeout for dns record delete. You probably need to fix something manually now.';
 					}
 					console.log(
-						'delete status pending, will try up to 10 times. currently at attempt: ' +
+						'REMOVE: Delete status pending, will try up to 10 times. currently at attempt: ' +
 							a
 					);
 					await new Promise((r) => setTimeout(r, 5000));
@@ -274,11 +273,11 @@ module.exports.create = function (config) {
 					changeStatus = changeMetadata.status;
 					a++;
 				}
-				console.log('old record delete should be done');
+				console.log('REMOVE: Old record delete should be done');
 
 				// if dnsAuthorization is the only value (length == 1) we can just delete the whole record and we know that dnsAuthorization is in the list
 				if (data.length === 1) {
-					console.log('delete record task completed');
+					console.log('REMOVE: Delete record task completed');
 					return true;
 				} else {
 					// remove the dnsAuthorization value from the data records and add the updated record
@@ -298,7 +297,7 @@ module.exports.create = function (config) {
 							throw 'timeout for dns record set. You probably need to fix something manually now.';
 						}
 						console.log(
-							'add status pending, will try up to 10 times. currently at attempt: ' +
+							'REMOVE: Add status pending, will try up to 10 times. currently at attempt: ' +
 								a
 						);
 						await new Promise((r) => setTimeout(r, 5000));
@@ -307,7 +306,7 @@ module.exports.create = function (config) {
 						a++;
 					}
 					console.log(
-						'updated record set should be done with dnsAuthorization removed'
+						'REMOVE: Updated record set should be done with dnsAuthorization removed'
 					);
 				}
 				return true;
