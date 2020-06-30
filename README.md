@@ -468,4 +468,4 @@ Want to get the experts involved? [Contact Root](acme-plugins@therootcompany.com
 
 We can take it on ourselves, work within your team, or guide an outsourced team.
 
-Turaround is typically a few days for simple modules with publicly available APIs.
+Turnaround is typically a few days for simple modules with publicly available APIs.
