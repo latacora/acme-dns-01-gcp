@@ -1,6 +1,6 @@
 {
 	"name": "acme-dns-01-gcp",
-	"version": "0.0.8",
+	"version": "0.0.9",
 	"description": "ACME dns-01 GCP for Let's Encrypt integration.",
 	"main": "index.js",
 	"homepage": "TBD",
