@@ -9,7 +9,8 @@
 	],
 	"dependencies": {
 		"@google-cloud/dns": "^1.2.8",
-		"dotenv": "^8.2.0"
+		"dotenv": "^8.2.0",
+		"node-forge": ">=0.10.0"
 	},
 	"devDependencies": {
 		"@root/acme": "^3.0.9",
